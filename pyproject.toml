@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "topchem"
+version = "0.1.0"
+description = "Set of tools to manipulate Gromacs topology files"
+authors = ["Danila Iakovlev <moleculadesigner@gmail.com>"]
+license = "LGPL-2.1"
+readme = "README.md"
+packages = [{include = "topchem"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.2.0"
+isort = "^5.13.2"
+flake8 = "^7.0.0"
+mypy = {version = "~1.0.0", extras = ["reports"]}
+
+
+# Linters and formatters settings
+[tool.isort]
+profile = "black"
+line_length = 100
+src_paths = ["topchem"]
+skip_gitignore = true
+filter_files = true
+
+[tool.black]
+line-length = 100
+exclude = '''
+/(
+\.git
+| \.hg
+| \.mypy_cache
+| \.tox
+| \.venv
+| _build
+| build
+| dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = [
+  "numpy.*"
+]
+ignore_missing_imports = true
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
