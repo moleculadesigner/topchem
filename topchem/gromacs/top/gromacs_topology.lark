@@ -1,0 +1,60 @@
+// topchem/gromacs/top/top.lark
+// ---
+// Lark EBNF grammar of Gromacs topology file.
+// Used in topchem.gromacs.top._ast module
+
+// Entypoint
+topology : (directive | _section | line_comment)+ -> topology
+
+// Directive parser
+directive : _INCLUDE PATH PPCOMMENT? _NEWLINE -> include
+          | _DEFINE CNAME (_value)* PPCOMMENT? _NEWLINE -> define
+          | _UNDEF CNAME PPCOMMENT? _NEWLINE -> undef
+          | _IFDEF CNAME PPCOMMENT? _NEWLINE -> ifdef
+          | _IFNDEF CNAME PPCOMMENT? _NEWLINE -> ifndef
+          | _ELSE PPCOMMENT? _NEWLINE -> else
+          | _ENDIF PPCOMMENT? _NEWLINE -> endif
+
+_INCLUDE : "#include"
+_DEFINE : "#define"
+_UNDEF : "#undef"
+_IFDEF : "#ifdef"
+_IFNDEF : "#ifndef"
+_ELSE : "#else"
+_ENDIF : "#endif"
+
+PATH : ANGLED_PATH | QUOTED_PATH
+ANGLED_PATH : "<" _STRING_ESC_INNER ">"
+QUOTED_PATH : ESCAPED_STRING
+
+PPCOMMENT : CPP_COMMENT | C_COMMENT
+C_COMMENT : "/*" /[^\n]*?/ "*/"
+
+// Comment parser
+COMMENT : /;[^\n]*/
+line_comment : COMMENT _NEWLINE -> line_comment
+
+// Section parser
+_section : section_header (directive | line_comment | entry)*
+section_header : "[" CNAME "]" COMMENT? _NEWLINE -> section_header
+entry : _value+ COMMENT? _NEWLINE -> entry
+
+// Common rules
+_value : ID | SIGNED_INT | SIGNED_FLOAT
+ID : ("+"|"-")? ("_"|LETTER) ("_"|LETTER|DIGIT|"-"|"+"|"*"|"'")*
+_NEWLINE : NEWLINE
+_IGNORE : WS_INLINE
+        | /\\[\ \t]*\r?\n/ // Escaped endlines
+        | /^[ \t]+\r?\n/m // Blank lines
+
+%import common.CNAME
+%import common.SIGNED_INT
+%import common.SIGNED_FLOAT
+%import common.NEWLINE
+%import common.CPP_COMMENT
+%import common.WS_INLINE
+%import common.ESCAPED_STRING
+%import common._STRING_ESC_INNER
+%import common.LETTER
+%import common.DIGIT
+%ignore _IGNORE

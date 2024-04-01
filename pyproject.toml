@@ -9,12 +9,14 @@ packages = [{include = "topchem"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+lark = "^1.1.9"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.2.0"
 isort = "^5.13.2"
 flake8 = "^7.0.0"
 mypy = {version = "~1.0.0", extras = ["reports"]}
+jupyter = "^1.0.0"
 
 
 # Linters and formatters settings
