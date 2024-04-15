@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-tochem.gromacs.top.ast
+tochem.gromacs.top.parser
 ~~~~~~~~~~~~~~
 
 A module with Lark parser grammar. Allows to read and produce

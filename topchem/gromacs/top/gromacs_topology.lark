@@ -1,14 +1,14 @@
 // topchem/gromacs/top/top.lark
 // ---
 // Lark EBNF grammar of Gromacs topology file.
-// Used in topchem.gromacs.top._ast module
+// Used in topchem.gromacs.top.parser module
 
-// Entypoint
-topology : (directive | _section | line_comment)+ -> topology
+// Entrypoint
+topology : preceeding* (directive | _section | block_comment)+ -> topology
 
 // Directive parser
 directive : _INCLUDE PATH PPCOMMENT? _NEWLINE -> include
-          | _DEFINE CNAME (_value)* PPCOMMENT? _NEWLINE -> define
+          | _DEFINE CNAME (_value | COMMENT)* PPCOMMENT? _NEWLINE -> define
           | _UNDEF CNAME PPCOMMENT? _NEWLINE -> undef
           | _IFDEF CNAME PPCOMMENT? _NEWLINE -> ifdef
           | _IFNDEF CNAME PPCOMMENT? _NEWLINE -> ifndef
@@ -16,12 +16,12 @@ directive : _INCLUDE PATH PPCOMMENT? _NEWLINE -> include
           | _ENDIF PPCOMMENT? _NEWLINE -> endif
 
 _INCLUDE : "#include"
-_DEFINE : "#define"
-_UNDEF : "#undef"
-_IFDEF : "#ifdef"
-_IFNDEF : "#ifndef"
-_ELSE : "#else"
-_ENDIF : "#endif"
+_DEFINE  : "#define"
+_UNDEF   : "#undef"
+_IFDEF   : "#ifdef"
+_IFNDEF  : "#ifndef"
+_ELSE    : "#else"
+_ENDIF   : "#endif"
 
 PATH : ANGLED_PATH | QUOTED_PATH
 ANGLED_PATH : "<" _STRING_ESC_INNER ">"
@@ -32,25 +32,30 @@ C_COMMENT : "/*" /[^\n]*?/ "*/"
 
 // Comment parser
 COMMENT : /;[^\n]*/
-line_comment : COMMENT _NEWLINE -> line_comment
+block_comment : (COMMENT _NEWLINE)+ -> block_comment
 
 // Section parser
-_section : section_header (directive | line_comment | entry)*
+_section : section_header (directive | block_comment | entry)*
 section_header : "[" CNAME "]" COMMENT? _NEWLINE -> section_header
 entry : _value+ COMMENT? _NEWLINE -> entry
 
 // Common rules
 _value : ID | SIGNED_INT | SIGNED_FLOAT
 ID : ("+"|"-")? ("_"|LETTER) ("_"|LETTER|DIGIT|"-"|"+"|"*"|"'")*
-_NEWLINE : NEWLINE
+_NEWLINE : (LINEBREAK | BLANK)+
 _IGNORE : WS_INLINE
-        | /\\[\ \t]*\r?\n/ // Escaped endlines
-        | /^[ \t]+\r?\n/m // Blank lines
+        | ESC_ENDLINE
+ESC_ENDLINE : /\\[\ \t]*\r?\n/  // Escaped endlines
+BLANK : /^[ \t]+\r?\n/m   // Blank lines
+LINEBREAK : /\r?\n/
+
+// Skip to the first meaningful entry
+preceeding: (PREC_LINE? _NEWLINE)+ -> preceeding
+PREC_LINE : /[ \t]*[^#;\[\n][^\n]*/
 
 %import common.CNAME
 %import common.SIGNED_INT
 %import common.SIGNED_FLOAT
-%import common.NEWLINE
 %import common.CPP_COMMENT
 %import common.WS_INLINE
 %import common.ESCAPED_STRING
