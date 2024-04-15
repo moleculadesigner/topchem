@@ -1,0 +1,17 @@
+#define a
+#define b
+#ifdef a
+[ section_a ] ; +
+ #ifdef c
+[ section_c ] ; -
+  #ifndef b
+[ section_b ] ; -
+  #else
+[ section_be ] ; -
+  #endif
+ #else
+[ section_ce ] ; +
+ #endif
+#else
+[ section_ae ] ; -
+#endif
