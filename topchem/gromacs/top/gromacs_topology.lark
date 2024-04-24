@@ -4,7 +4,7 @@
 // Used in topchem.gromacs.top.parser module
 
 // Entrypoint
-topology : preceeding* (directive | _section | block_comment)+ -> topology
+topology : preceeding* (directive | section_header | entry | block_comment)+ -> topology
 
 // Directive parser
 directive : _INCLUDE PATH PPCOMMENT? _NEWLINE -> include
